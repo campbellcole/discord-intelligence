@@ -15,5 +15,9 @@
   "bugs": {
     "url": "https://github.com/campbellcole/discord-intelligence/issues"
   },
-  "homepage": "https://github.com/campbellcole/discord-intelligence#readme"
+  "homepage": "https://github.com/campbellcole/discord-intelligence#readme",
+  "dependencies": {
+    "discord.js": "^11.3.2",
+    "ws": "^5.2.0"
+  }
 }
