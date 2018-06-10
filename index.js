@@ -8,15 +8,13 @@ const fs = require('fs');
 console.log("Developed by Campbell Cole");
 console.log("If you do not have a tensorflow anaconda environment set up, this will not work.");
 
-const wss = new WebSocket.Server({ port: 3000 });
+const wss = new WebSocket.Server({ port: 3000, clientTracking: true });
 
 const client = new Discord.Client();
 const TOKEN = fs.readFileSync('common/discord-token.txt', 'utf8').trim();
 client.login(TOKEN);
 
 // vars
-
-var discordConnected = false;
 var socketConnected = false;
 
 var channel = null; // single channel bot only
@@ -31,21 +29,36 @@ function sendDiscordMessage(text) {
   }
 }
 
-client.on('ready', () => { discordConnected=true; console.log('logged in to discord: ' + client.user.tag); });
+client.on('ready', () => { console.log('logged in to discord: ' + client.user.tag); });
 
 client.on('message', message => {
   if (message.content.startsWith('det:')) {
+    var msg = message.content.substr(4);
+    var spl = msg.split(" ");
+    var cmd = spl[0];
+    var args = spl.length > 1 ? spl.splice(0,1) : "none";
     if (channel == null) channel = message.channel;
-    if (socketConnected) {
-      if (!pending) {
-        sendSocketMessage(message.content.substr(4));
-        pending = true;
-      } else {
-        sendDiscordMessage("Operation currently pending. Please wait.")
-      }
-    } else {
-      message.channel.send("The Neural Network is not running!\n"
-      + "(socket not connected)");
+    switch (cmd) {
+      case "help":
+        sendDiscordMessage("no lmao");
+        break;
+      case "link":
+        channel = message.channel;
+        sendDiscordMessage("Linked to current channel. (If you DM me commands, the outputs will appear here)");
+        break;
+      case "status":
+        sendDiscordMessage("Status:"
+        + "\nsocketConnected = " + socketConnected
+          + "\npending = " + pending
+            + "\nmessage.content = " + message.content
+              + "\ncmd = " + cmd
+                + "\nargs = " + args
+                  + "\nchannel = " + channel
+                    + "\nmessage.author = " + message.author);
+        break;
+      case "generate":
+        sendSocketMessage(msg);
+        break;
     }
   }
 });
@@ -53,7 +66,20 @@ client.on('message', message => {
 // websocket
 
 function sendSocketMessage(text) {
-  wss.clients[0].send(text); // will never be multiple clients
+  if (!socketConnected) {
+    sendDiscordMessage("The Neural Network is not running!\n"
+    + "socketConnected = false");
+  }
+  if (!pending) {
+    wss.clients.forEach(function each(client) {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(text);
+      }
+    }); // will never be multiple clients, but i guess i still need to do this
+    pending = true;
+  } else {
+    sendDiscordMessage("Operation currently pending. Please wait.");
+  }
 }
 
 wss.on('connection', ws => {
