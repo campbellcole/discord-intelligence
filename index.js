@@ -29,37 +29,14 @@ function sendDiscordMessage(text) {
   }
 }
 
+// TODO: Save discord messages to study
+
 client.on('ready', () => { console.log('logged in to discord: ' + client.user.tag); });
 
 client.on('message', message => {
   if (message.content.startsWith('det:')) {
-    var msg = message.content.substr(4);
-    var spl = msg.split(" ");
-    var cmd = spl[0];
-    var args = spl.length > 1 ? spl.splice(0,1) : "none";
     if (channel == null) channel = message.channel;
-    switch (cmd) {
-      case "help":
-        sendDiscordMessage("no lmao");
-        break;
-      case "link":
-        channel = message.channel;
-        sendDiscordMessage("Linked to current channel. (If you DM me commands, the outputs will appear here)");
-        break;
-      case "status":
-        sendDiscordMessage("Status:"
-        + "\nsocketConnected = " + socketConnected
-          + "\npending = " + pending
-            + "\nmessage.content = " + message.content
-              + "\ncmd = " + cmd
-                + "\nargs = " + args
-                  + "\nchannel = " + channel
-                    + "\nmessage.author = " + message.author);
-        break;
-      case "generate":
-        sendSocketMessage(msg);
-        break;
-    }
+    handleCommand(message.content.substr(4));
   }
 });
 
@@ -68,7 +45,7 @@ client.on('message', message => {
 function sendSocketMessage(text) {
   if (!socketConnected) {
     sendDiscordMessage("The Neural Network is not running!\n"
-    + "socketConnected = false");
+                      + "socketConnected = false");
   }
   if (!pending) {
     wss.clients.forEach(function each(client) {
@@ -90,3 +67,37 @@ wss.on('connection', ws => {
     pending = false;
   });
 });
+
+// command handling
+
+function handleCommand(msg) {
+  var spl = msg.split(" ");
+  var cmd = spl[0];
+  var args = spl.length > 1 ? spl.splice(0,1) : "none";
+  switch (cmd) {
+    case "help":
+      sendDiscordMessage("no lmao");
+      break;
+    case "link":
+      channel = message.channel;
+      sendDiscordMessage("Linked to current channel. (If you DM me commands, the outputs will appear here)");
+      break;
+    case "status":
+      sendDiscordMessage("Status:"
+                        + "\nsocketConnected = " + socketConnected
+                        + "\npending = " + pending
+                        + "\nmessage.content = " + message.content
+                        + "\ncmd = " + cmd
+                        + "\nargs = " + args
+                        + "\nchannel = " + channel
+                        + "\nmessage.author = " + message.author);
+      break;
+    case "generate":
+      sendSocketMessage(msg);
+      break;
+  }
+}
+
+// network (python script)
+
+//TODO: control the script from here instead of manually
