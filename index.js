@@ -31,7 +31,7 @@ function sendDiscordMessage(text) {
   }
 }
 
-client.on('ready', () => { discordConnected=true; });
+client.on('ready', () => { discordConnected=true; console.log('logged in to discord: ' + client.user.tag); });
 
 client.on('message', message => {
   if (message.content.startsWith('det:')) {
@@ -57,6 +57,7 @@ function sendSocketMessage(text) {
 }
 
 wss.on('connection', ws => {
+  console.log('connected to neural network')
   socketConnected = true;
   ws.on('message', function incoming(message) {
     sendDiscordMessage(message);
