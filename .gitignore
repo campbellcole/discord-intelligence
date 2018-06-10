@@ -164,5 +164,3 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-
-common/discord-token.txt
