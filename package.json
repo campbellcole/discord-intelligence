@@ -1,0 +1,19 @@
+{
+  "name": "discord-intelligence",
+  "version": "0.0.1-dev",
+  "description": "Discord Neural Network",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/campbellcole/discord-intelligence.git"
+  },
+  "author": "Campbell M. Cole",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/campbellcole/discord-intelligence/issues"
+  },
+  "homepage": "https://github.com/campbellcole/discord-intelligence#readme"
+}
