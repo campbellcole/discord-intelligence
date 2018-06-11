@@ -35,8 +35,8 @@ client.on('message', message => {
   if (message.content.startsWith('det:')) {
     if (channel == null) channel = message.channel;
     handleCommand(message.content.substr(4));
-  } else { // TODO: Decide whether or not to use newlines
-    fs.appendFile("common/study-data.txt", "\n"+message.content, () => {});
+  } else { // no newlines will probably make it funnier
+    fs.appendFile("common/study-data.txt", message.content, () => {});
   }
 });
 
