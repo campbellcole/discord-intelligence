@@ -29,14 +29,14 @@ function sendDiscordMessage(text) {
   }
 }
 
-// TODO: Save discord messages to study
-
 client.on('ready', () => { console.log('logged in to discord: ' + client.user.tag); });
 
 client.on('message', message => {
   if (message.content.startsWith('det:')) {
     if (channel == null) channel = message.channel;
     handleCommand(message.content.substr(4));
+  } else { // TODO: Decide whether or not to use newlines
+    fs.appendFile("common/study-data.txt", "\n"+message.content, () => {});
   }
 });
 
