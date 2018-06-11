@@ -166,3 +166,4 @@ venv.bak/
 .mypy_cache/
 
 common/discord-token.txt
+common/study-data.txt

@@ -1,12 +1,10 @@
 // 'require's
+
 const WebSocket = require('ws');
 const Discord = require('discord.js');
 const fs = require('fs');
 
 // init
-
-console.log("Developed by Campbell Cole");
-console.log("If you do not have a tensorflow anaconda environment set up, this will not work.");
 
 const wss = new WebSocket.Server({ port: 3000, clientTracking: true });
 
@@ -14,11 +12,13 @@ const client = new Discord.Client();
 const TOKEN = fs.readFileSync('common/discord-token.txt', 'utf8').trim();
 client.login(TOKEN);
 
+console.log("Developed by Campbell Cole");
+console.log("If you do not have a tensorflow anaconda environment set up, this will not work.");
+
 // vars
+
 var socketConnected = false;
-
 var channel = null; // single channel bot only
-
 var pending = false; // one command at a time
 
 // discord
@@ -34,9 +34,9 @@ client.on('ready', () => { console.log('logged in to discord: ' + client.user.ta
 client.on('message', message => {
   if (message.content.startsWith('det:')) {
     if (channel == null) channel = message.channel;
-    handleCommand(message.content.substr(4));
+    handleCommand(message);
   } else { // no newlines will probably make it funnier
-    fs.appendFile("common/study-data.txt", message.content, () => {});
+    if (msg.author != client.user) fs.appendFile("common/study-data.txt", message.content, () => {});
   }
 });
 
@@ -52,7 +52,7 @@ function sendSocketMessage(text) {
       if (client.readyState === WebSocket.OPEN) {
         client.send(text);
       }
-    }); // will never be multiple clients, but i guess i still need to do this
+    }); // maybe i could hook up multiple neural networks with this
     pending = true;
   } else {
     sendDiscordMessage("Operation currently pending. Please wait.");
@@ -70,7 +70,8 @@ wss.on('connection', ws => {
 
 // command handling
 
-function handleCommand(msg) {
+function handleCommand(message) {
+  var msg = message.content.substr(4);
   var spl = msg.split(" ");
   var cmd = spl[0];
   var args = spl.length > 1 ? spl.splice(0,1) : "none";
@@ -95,9 +96,25 @@ function handleCommand(msg) {
     case "generate":
       sendSocketMessage(msg);
       break;
+    default:
+      sendDiscordMessage("Invalid command. Don't ask me for help.");
   }
 }
 
-// network (python script)
+// neural network (python script)
 
 //TODO: control the script from here instead of manually
+
+//const shell = require('shelljs');
+
+function startNet() {
+
+}
+
+function stopNet() {
+
+}
+
+function trainNet(epochs = 50) {
+
+}
