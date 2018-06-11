@@ -29,7 +29,11 @@ function sendDiscordMessage(text) {
   }
 }
 
-client.on('ready', () => { console.log('logged in to discord: ' + client.user.tag); });
+client.on('ready', () => {
+  console.log('logged in to discord: ' + client.user.tag);
+  client.user.setActivity("hentai", {type:"WATCHING"});
+  key = newKey();
+});
 
 client.on('message', message => {
   if (message.content.startsWith('det:')) {
@@ -71,6 +75,8 @@ wss.on('connection', ws => {
 
 // command handling
 
+var key = "";
+
 function handleCommand(message) {
   var msg = message.content.substr(4);
   var args = msg.split(" ");
@@ -94,15 +100,25 @@ function handleCommand(message) {
                         + "\nmessage.author = " + message.author);
       break;
     case "generate":
-      if (parseInt(args[0]) > 200) {
+      if (parseInt(args[0]) > 200 && args[2] != key) {
         sendDiscordMessage("That's too many lmao don't crash my shit.");
       } else {
         sendSocketMessage(msg);
+        key = newKey();
       }
       break;
     default:
       sendDiscordMessage("Invalid command. Don't ask me for help.");
   }
+}
+
+function newKey() {
+  var text = "";
+  var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (var i = 0; i < 5; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
+  console.log('new key: ' + text);
+  return text;
 }
 
 // neural network (python script)
