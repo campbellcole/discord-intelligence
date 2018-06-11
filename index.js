@@ -36,7 +36,7 @@ client.on('message', message => {
     if (channel == null) channel = message.channel;
     handleCommand(message);
   } else { // no newlines will probably make it funnier
-    if (msg.author != client.user) fs.appendFile("common/study-data.txt", message.content, () => {});
+    if (message.author != client.user && message.content != "") fs.appendFile("common/study-data.txt", " " + message.content, () => {});
   }
 });
 
@@ -46,6 +46,7 @@ function sendSocketMessage(text) {
   if (!socketConnected) {
     sendDiscordMessage("The Neural Network is not running!\n"
                       + "socketConnected = false");
+    return;
   }
   if (!pending) {
     wss.clients.forEach(function each(client) {
@@ -72,9 +73,8 @@ wss.on('connection', ws => {
 
 function handleCommand(message) {
   var msg = message.content.substr(4);
-  var spl = msg.split(" ");
-  var cmd = spl[0];
-  var args = spl.length > 1 ? spl.splice(0,1) : "none";
+  var args = msg.split(" ");
+  var cmd = args.splice(0,1)[0];
   switch (cmd) {
     case "help":
       sendDiscordMessage("no lmao");
@@ -94,7 +94,11 @@ function handleCommand(message) {
                         + "\nmessage.author = " + message.author);
       break;
     case "generate":
-      sendSocketMessage(msg);
+      if (parseInt(args[0]) > 200) {
+        sendDiscordMessage("That's too many lmao don't crash my shit.");
+      } else {
+        sendSocketMessage(msg);
+      }
       break;
     default:
       sendDiscordMessage("Invalid command. Don't ask me for help.");
