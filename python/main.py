@@ -27,7 +27,7 @@ ap.add_argument('--hidden_dim', type=int, default=500)
 ap.add_argument('--generate_length', type=int, default=500)
 ap.add_argument('--nb_epoch', type=int, default=20)
 ap.add_argument('--mode', default='train')
-ap.add_argument('--model', default='')
+ap.add_argument('--model', default=os.getcwd() + '\\checkpoint.hdf5')
 ap.add_argument('--retrain', type=bool, default=False)
 ap.add_argument('--epochs', type=int, default=50)
 args = vars(ap.parse_args())
@@ -66,7 +66,7 @@ nb_epoch = 0 # this means nothing now because i'm not saving the epoch number
 if args['mode'] == 'train':
     if (RETRAIN):
         try:
-            os.remove(os.getcwd() + '\\checkpoint.hdf5')
+            os.remove(MODEL)
         except Exception:
             pass
     while True:
@@ -74,7 +74,7 @@ if args['mode'] == 'train':
         model.fit(X, y, batch_size=BATCH_SIZE, verbose=1, nb_epoch=1)
         nb_epoch += 1
         if nb_epoch == EPOCHS:
-            model.save('checkpoint.hdf5', overwrite=True)
+            model.save(MODEL, overwrite=True)
             exit()
 
 

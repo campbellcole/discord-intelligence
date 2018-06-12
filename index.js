@@ -16,8 +16,6 @@ client.login(TOKEN);
 console.log("Developed by Campbell Cole");
 console.log("If you do not have a tensorflow anaconda environment set up, this will not work.");
 
-startNet();
-
 // vars
 
 var socketConnected = false;
@@ -28,6 +26,7 @@ var pending = false; // one command at a time
 // discord
 
 function sendDiscordMessage(text) {
+  if (!discordConnected) return;
   if (channel != null) {
     channel.send(text);
   }
@@ -71,7 +70,7 @@ function sendSocketMessage(text) {
 wss.on('connection', ws => {
   console.log('connected to neural network')
   socketConnected = true;
-  if (discordConnected) sendDiscordMessage('Socket connected successfully.');
+  sendDiscordMessage('Network started successfully.');
   ws.on('message', function incoming(message) {
     sendDiscordMessage(message);
     pending = false;
@@ -116,6 +115,18 @@ function handleCommand(message) {
         key = newKey();
       }
       break;
+    case "startnet":
+      startNet();
+      break;
+    case "stopnet":
+      stopNet();
+      break;
+    case "trainnet":
+      var epochs = 50, retrain = false;
+      if (args[0] != null && args[0] != "") epochs = parseInt(args[0]);
+      if (args[1] != null && args[1] != "") retrain = (args[1]=='true');
+      trainNet(epochs, retrain);
+      break;
     case "generate":
       if (parseInt(args[0]) > 200 && args[2] != key) {
         sendDiscordMessage("That's too many lmao don't crash my shit.");
@@ -157,35 +168,42 @@ process.stdin.on('data', function (text) {
 
 var pyshell = null;
 
-// -data_dir=common/study-data.txt -alphabet_dir=common/alphabet.txt -mode=gen -model=common/network.hdf5
-
-// -data_dir=common/study-data.txt -alphabet_dir=common/alphabet.txt -mode=train -model=common/network.hdf5 -epochs=x -retrain=y
-var trainArgs = ["--data_dir=common/study-data.txt", "--alphabet_dir=common/alphabet.txt", "--mode=train", "--model=common/network.hdf5"];
-
 function startNet() {
   var genArgs = ["--data_dir=common/study-data.txt", "--alphabet_dir=common/alphabet.txt", "--mode=gen", "--model=common/network.hdf5"];
-  /*if (!fs.existsSync("common/network.hdf5")) {
+  if (!fs.existsSync("common/network.hdf5")) {
     console.log("network save file does not exist, you must begin training first");
-    if (discordConnected) sendDiscordMessage("Could not start neural network. Checkpoint does not exist. Train the network.");
+    sendDiscordMessage("Could not start neural network. Checkpoint does not exist. Train the network.");
     return;
-  }*/
+  }
   console.log('starting neural network with web socket');
-  pyshell = new PythonShell('python/main.py', { pythonOptions: ["-u"], args: genArgs });
-  pyshell.on('error', function (message) {
-    console.log(message);
-  });
-
+  sendDiscordMessage("Starting neural network...");
+  pyshell = new PythonShell('python/main.py', { args: genArgs });
+  pyshell.on('error', () => {});
+  pyshell.on('message', () => {});
+  pyshell.on('close', () => {
+    console.log('neural network stopped');
+    sendDiscordMessage('Neural network stopped.');
+  })
 }
 
 function stopNet() {
+  if (pyshell == null) return;
   if (!pyshell.terminated) pyshell.terminate();
-  else console.log("network already terminated");
 }
 
 function trainNet(epochs = 50, reset = false) {
+  var trainArgs = ["--data_dir=common/study-data.txt", "--alphabet_dir=common/alphabet.txt", "--mode=train", "--model=common/network.hdf5"];
   console.log('training network with ' + epochs + " epochs.");
   stopNet();
-  trainArgs.push("-epochs="+epochs);
-  if (reset) trainArgs.push('-retrain=True');
-  pyshell = new PythonShell('python/main.py', trainArgs);
+  trainArgs.push("--epochs="+epochs);
+  if (reset) trainArgs.push('--retrain=True');
+  pyshell = new PythonShell('python/main.py', { args: trainArgs });
+  pending = true;
+  pyshell.on('error', () => {});
+  pyshell.on('message', () => {});
+  pyshell.on('close', () => {
+    console.log('done training.');
+    sendDiscordMessage('Training completed. Ran ' + epochs + ' epochs.');
+    pending = false;
+  });
 }
