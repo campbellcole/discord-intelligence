@@ -7,7 +7,10 @@ const PythonShell = require('python-shell');
 
 // init
 
-const wss = new WebSocket.Server({ port: 3000, clientTracking: true });
+const wss = new WebSocket.Server({
+  port: 3000,
+  clientTracking: true
+});
 
 const client = new Discord.Client();
 const TOKEN = fs.readFileSync('common/discord-token.txt', 'utf8').trim();
@@ -35,7 +38,9 @@ function sendDiscordMessage(text) {
 client.on('ready', () => {
   discordConnected = true;
   console.log('logged in to discord: ' + client.user.tag);
-  client.user.setActivity("hentai", {type:"WATCHING"});
+  client.user.setActivity("hentai", {
+    type: "WATCHING"
+  });
   key = newKey();
 });
 
@@ -98,17 +103,17 @@ function handleCommand(message) {
       sendDiscordMessage("Linked to current channel. (If you DM me commands, the outputs will appear here)");
       break;
     case "status":
-      sendDiscordMessage("Status:"
-                        + "\nsocketConnected = " + socketConnected
-                        + "\npending = " + pending
-                        + "\nmessage.content = " + message.content
-                        + "\ncmd = " + cmd
-                        + "\nargs = " + args
-                        + "\nchannel = " + channel
-                        + "\nmessage.author = " + message.author);
+      sendDiscordMessage("Status:" +
+        "\nsocketConnected = " + socketConnected +
+        "\npending = " + pending +
+        "\nmessage.content = " + message.content +
+        "\ncmd = " + cmd +
+        "\nargs = " + args +
+        "\nchannel = " + channel +
+        "\nmessage.author = " + message.author);
       break;
     case "forcepending":
-      var willBePending = args[0]=='true';
+      var willBePending = args[0] == 'true';
       if (args[1] == key) {
         pending = willBePending;
         sendDiscordMessage("Forced 'pending' to " + pending);
@@ -122,14 +127,15 @@ function handleCommand(message) {
       stopNet();
       break;
     case "trainnet":
-      var epochs = 50, retrain = false;
+      var epochs = 50,
+        retrain = false;
       if (args[0] != null && args[0] != "") epochs = parseInt(args[0]);
-      if (args[1] != null && args[1] != "") retrain = (args[1]=='true');
+      if (args[1] != null && args[1] != "") retrain = (args[1] == 'true');
       trainNet(epochs, retrain);
       break;
     case "generate":
       if (parseInt(args[0]) > 200 && args[2] != key) {
-        sendDiscordMessage("That's too many lmao don't crash my shit.");
+        sendDiscordMessage("Too many characters. That's gonna take too long.");
       } else {
         sendSocketMessage(msg);
         key = newKey();
@@ -154,12 +160,16 @@ function newKey() {
 process.stdin.resume();
 process.stdin.setEncoding('utf8');
 var util = require('util');
-process.stdin.on('data', function (text) {
+process.stdin.on('data', function(text) {
   if (channel == null) {
     console.log('channel not set, link to a channel in client');
     return;
   }
-  handleCommand({content:"det:"+text.trim(), channel:null, author:"console"});
+  handleCommand({
+    content: "det:" + text.trim(),
+    channel: null,
+    author: "console"
+  });
 });
 
 // neural network (python script)
@@ -177,7 +187,9 @@ function startNet() {
   }
   console.log('starting neural network with web socket');
   sendDiscordMessage("Starting neural network...");
-  pyshell = new PythonShell('python/main.py', { args: genArgs });
+  pyshell = new PythonShell('python/main.py', {
+    args: genArgs
+  });
   pyshell.on('error', () => {});
   pyshell.on('message', () => {});
   pyshell.on('close', () => {
@@ -195,9 +207,11 @@ function trainNet(epochs = 50, reset = false) {
   var trainArgs = ["--data_dir=common/study-data.txt", "--alphabet_dir=common/alphabet.txt", "--mode=train", "--model=common/network.hdf5"];
   console.log('training network with ' + epochs + " epochs.");
   stopNet();
-  trainArgs.push("--epochs="+epochs);
+  trainArgs.push("--epochs=" + epochs);
   if (reset) trainArgs.push('--retrain=True');
-  pyshell = new PythonShell('python/main.py', { args: trainArgs });
+  pyshell = new PythonShell('python/main.py', {
+    args: trainArgs
+  });
   pending = true;
   pyshell.on('error', () => {});
   pyshell.on('message', () => {});
