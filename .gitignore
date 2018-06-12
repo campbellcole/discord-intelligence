@@ -167,3 +167,4 @@ venv.bak/
 
 common/discord-token.txt
 common/study-data.txt
+*.hdf5
