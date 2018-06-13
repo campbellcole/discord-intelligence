@@ -42,7 +42,6 @@ client.on('ready', () => {
   client.user.setActivity("hentai", {
     type: "WATCHING"
   });
-  key = newKey();
 });
 
 client.on('message', message => {
@@ -95,15 +94,13 @@ function handleCommand(message) {
       sendDiscordMessage("no lmao");
       break;
     case "link":
-      if (args[0] != key) return;
-      key = newKey();
+      if (message.author != owner) return;
       if (message.channel == null) break;
       channel = message.channel;
       sendDiscordMessage("Linked to current channel. (If you DM me commands, the outputs will appear here)");
       break;
     case "status":
-      if (args[0] != key) return;
-      key = newKey();
+      if (message.author != owner) return;
       sendDiscordMessage("Status:" +
         "\nsocketConnected = " + socketConnected +
         "\npending = " + pending +
@@ -114,25 +111,21 @@ function handleCommand(message) {
         "\nmessage.author = " + message.author);
       break;
     case "forcepending":
-      if (args[1] != key) return;
-      key = newKey();
+      if (message.author != owner) return;
       var willBePending = args[0] == 'true';
       pending = willBePending;
       sendDiscordMessage("Forced 'pending' to " + pending);
       break;
     case "startnet":
-      if (args[0] != key) return;
-      key = newKey();
+      if (message.author != owner) return;
       startNet();
       break;
     case "stopnet":
-      if (args[0] != key) return;
-      key = newKey();
+      if (message.author != owner) return;
       stopNet();
       break;
     case "trainnet":
-      if (args[2] != key) return;
-      key = newKey();
+      if (message.author != owner) return;
       var epochs = 50,
         retrain = false;
       if (args[0] != null && args[0] != "") epochs = parseInt(args[0]);
@@ -147,26 +140,15 @@ function handleCommand(message) {
       }
       break;
     case "generate":
-      if (parseInt(args[0]) > 200 && args[2] != key) {
+      if (parseInt(args[0]) > 200 && message.author != owner) {
         sendDiscordMessage("Too many characters. That's gonna take too long.");
       } else {
-        if (args[2] == key) {
-          key = newKey();
-        }
         sendSocketMessage(msg);
       }
       break;
     default:
       sendDiscordMessage("Invalid command. Don't ask me for help.");
   }
-}
-
-function newKey() {
-  var text = "";
-  var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
-  for (var i = 0; i < 5; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
-  owner.send(text);
-  return text;
 }
 
 // commandline input
