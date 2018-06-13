@@ -16,9 +16,6 @@ const client = new Discord.Client();
 const TOKEN = fs.readFileSync('common/discord-token.txt', 'utf8').trim();
 client.login(TOKEN);
 
-console.log("Developed by Campbell Cole");
-console.log("If you do not have a tensorflow anaconda environment set up, this will not work.");
-
 // vars
 
 var socketConnected = false;
@@ -40,7 +37,6 @@ function sendDiscordMessage(text) {
 
 client.on('ready', () => {
   discordConnected = true;
-  console.log('logged in to discord: ' + client.user.tag);
   client.user.setActivity("hentai", {
     type: "WATCHING"
   });
@@ -179,6 +175,7 @@ function handleCommand(message) {
       nextInterval();
       break;
     case "initialize":
+      sendDiscordMessage("wolfram-bot version 1.0 by Campbell Cole");
       var willstartnet = !(args[0] == 'false')
       // setowner
       if (owner == null) {
