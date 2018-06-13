@@ -16,7 +16,7 @@ const client = new Discord.Client();
 const TOKEN = fs.readFileSync('common/discord-token.txt', 'utf8').trim();
 client.login(TOKEN);
 
-const VERSION = "1.3.1";
+const VERSION = "1.3.2";
 const PREFIX = "det:";
 
 // vars
