@@ -195,7 +195,7 @@ function startNet() {
   pyshell.on('close', () => {
     console.log('neural network stopped');
     sendDiscordMessage('Neural network stopped.');
-  })
+  });
 }
 
 function stopNet() {
