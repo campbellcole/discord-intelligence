@@ -16,6 +16,8 @@ const client = new Discord.Client();
 const TOKEN = fs.readFileSync('common/discord-token.txt', 'utf8').trim();
 client.login(TOKEN);
 
+const VERSION = "1.1";
+
 // vars
 
 var socketConnected = false;
@@ -89,7 +91,26 @@ function handleCommand(message) {
   var cmd = args.splice(0, 1)[0];
   switch (cmd) {
     case "help":
-      sendDiscordMessage("no lmao");
+      var helpstring_builder = "";
+      var n = "\n";
+      helpstring_builder += "det:<command> [args]" + n;
+      helpstring_builder += "Commands:" + n;
+      helpstring_builder += "help: displays this message" + n;
+      helpstring_builder += "generate <length> [seed]: generates text" + n;
+      if (message.author == owner) {
+        helpstring_builder += "link: sets \"channel\" to current channel" + n;
+        helpstring_builder += "status: displays variables currently set" + n;
+        helpstring_builder += "forcepending <true/false>: forces the \"pending\" variable in case it's stuck" + n;
+        helpstring_builder += "startnet: starts the neural network" + n;
+        helpstring_builder += "stopnet: stops the neural network" + n;
+        helpstring_builder += "trainnet <epochs> [retrain]: trains the neural network" + n;
+        helpstring_builder += "WARNING: if [retrain] is set to \"true\", the network will be erased and restarted!" + n;
+        helpstring_builder += "setowner: sets the privileged user" + n;
+        helpstring_builder += "setautogenerate <true/false> <delay>: sets the timer for automatic generation" + n;
+        helpstring_builder += "initialize: initializes wolfram-bot" + n;
+        helpstring_builder += "restart: restarts the wolfram-bot" + n;
+      }
+      sendDiscordMessage(helpstring_builder);
       break;
     case "link":
       if (message.author != owner) return;
@@ -175,7 +196,7 @@ function handleCommand(message) {
       nextInterval();
       break;
     case "initialize":
-      sendDiscordMessage("wolfram-bot version 1.0 by Campbell Cole");
+      sendDiscordMessage("wolfram-bot v" + VERSION + " by Campbell Cole");
       var willstartnet = !(args[0] == 'false')
       // setowner
       if (owner == null) {
@@ -199,7 +220,7 @@ function handleCommand(message) {
       process.exit();
       break;
     default:
-      sendDiscordMessage("Invalid command. Don't ask me for help.");
+      sendDiscordMessage("Invalid command. Type \"det:help\" for help.");
   }
 }
 
