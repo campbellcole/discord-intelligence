@@ -1,0 +1,3 @@
+This code was taken from https://github.com/ChunML/text-generator and modified.
+
+Thank you ChunML for making the Python script. Wouldn't have been able to make that.
