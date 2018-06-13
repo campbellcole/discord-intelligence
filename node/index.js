@@ -16,7 +16,7 @@ const client = new Discord.Client();
 const TOKEN = fs.readFileSync('common/discord-token.txt', 'utf8').trim();
 client.login(TOKEN);
 
-const VERSION = "1.3";
+const VERSION = "1.3.1";
 const PREFIX = "det:";
 
 // vars
@@ -110,7 +110,7 @@ function handleCommand(message) {
         helpstring_builder += "__***WARNING: if [retrain] is set to \"true\", the network will be erased and restarted!***__" + n;
         helpstring_builder += "**setowner:** sets the privileged user" + n;
         helpstring_builder += "**setautogenerate <true/false> <delay>:** sets the timer for automatic generation" + n;
-        helpstring_builder += "**initialize:** initializes wolfram-bot" + n;
+        helpstring_builder += "**initialize [verbose]:** initializes wolfram-bot" + n;
         helpstring_builder += "**restart:** restarts the wolfram-bot" + n;
       }
       sendDiscordMessage(helpstring_builder);
@@ -202,7 +202,7 @@ function handleCommand(message) {
       nextInterval();
       break;
     case "initialize":
-      silent = (args[0] == "silent");
+      silent = !(args[0] == "verbose");
       sendDiscordMessage("wolfram-bot v" + VERSION + " by Campbell Cole", true);
       var willstartnet = !(args[0] == 'false')
       // setowner
