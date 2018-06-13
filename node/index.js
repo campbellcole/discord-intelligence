@@ -23,6 +23,7 @@ console.log("If you do not have a tensorflow anaconda environment set up, this w
 
 var socketConnected = false;
 var discordConnected = false;
+var owner = null;
 var channel = null; // single channel bot only
 var pending = false; // one command at a time
 
@@ -73,7 +74,6 @@ function sendSocketMessage(text) {
 }
 
 wss.on('connection', ws => {
-  console.log('connected to neural network')
   socketConnected = true;
   sendDiscordMessage('Network started successfully.');
   ws.on('message', function incoming(message) {
@@ -95,14 +95,15 @@ function handleCommand(message) {
       sendDiscordMessage("no lmao");
       break;
     case "link":
-      if (message.channel == null) {
-        console.log('cannot be run from console');
-        break;
-      }
+      if (args[0] != key) return;
+      key = newKey();
+      if (message.channel == null) break;
       channel = message.channel;
       sendDiscordMessage("Linked to current channel. (If you DM me commands, the outputs will appear here)");
       break;
     case "status":
+      if (args[0] != key) return;
+      key = newKey();
       sendDiscordMessage("Status:" +
         "\nsocketConnected = " + socketConnected +
         "\npending = " + pending +
@@ -113,32 +114,46 @@ function handleCommand(message) {
         "\nmessage.author = " + message.author);
       break;
     case "forcepending":
+      if (args[1] != key) return;
+      key = newKey();
       var willBePending = args[0] == 'true';
-      if (args[1] == key) {
-        pending = willBePending;
-        sendDiscordMessage("Forced 'pending' to " + pending);
-        key = newKey();
-      }
+      pending = willBePending;
+      sendDiscordMessage("Forced 'pending' to " + pending);
       break;
     case "startnet":
+      if (args[0] != key) return;
+      key = newKey();
       startNet();
       break;
     case "stopnet":
+      if (args[0] != key) return;
+      key = newKey();
       stopNet();
       break;
     case "trainnet":
+      if (args[2] != key) return;
+      key = newKey();
       var epochs = 50,
         retrain = false;
       if (args[0] != null && args[0] != "") epochs = parseInt(args[0]);
       if (args[1] != null && args[1] != "") retrain = (args[1] == 'true');
       trainNet(epochs, retrain);
       break;
+    case "setowner":
+      if (owner == null) {
+        owner = message.author;
+      } else {
+        message.author.send("Nice try.");
+      }
+      break;
     case "generate":
       if (parseInt(args[0]) > 200 && args[2] != key) {
         sendDiscordMessage("Too many characters. That's gonna take too long.");
       } else {
+        if (args[2] == key) {
+          key = newKey();
+        }
         sendSocketMessage(msg);
-        key = newKey();
       }
       break;
     default:
@@ -149,9 +164,8 @@ function handleCommand(message) {
 function newKey() {
   var text = "";
   var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
-
   for (var i = 0; i < 5; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
-  console.log('new key: ' + text);
+  owner.send(text);
   return text;
 }
 
@@ -161,10 +175,7 @@ process.stdin.resume();
 process.stdin.setEncoding('utf8');
 var util = require('util');
 process.stdin.on('data', function(text) {
-  if (channel == null) {
-    console.log('channel not set, link to a channel in client');
-    return;
-  }
+  if (channel == null) return;
   handleCommand({
     content: "det:" + text.trim(),
     channel: null,
@@ -181,11 +192,9 @@ var pyshell = null;
 function startNet() {
   var genArgs = ["--data_dir=common/study-data.txt", "--alphabet_dir=common/alphabet.txt", "--mode=gen", "--model=common/network.hdf5"];
   if (!fs.existsSync("common/network.hdf5")) {
-    console.log("network save file does not exist, you must begin training first");
     sendDiscordMessage("Could not start neural network. Checkpoint does not exist. Train the network.");
     return;
   }
-  console.log('starting neural network with web socket');
   sendDiscordMessage("Starting neural network...");
   pyshell = new PythonShell('python/main.py', {
     args: genArgs
@@ -193,7 +202,6 @@ function startNet() {
   pyshell.on('error', () => {});
   pyshell.on('message', () => {});
   pyshell.on('close', () => {
-    console.log('neural network stopped');
     sendDiscordMessage('Neural network stopped.');
   });
 }
@@ -205,7 +213,6 @@ function stopNet() {
 
 function trainNet(epochs = 50, reset = false) {
   var trainArgs = ["--data_dir=common/study-data.txt", "--alphabet_dir=common/alphabet.txt", "--mode=train", "--model=common/network.hdf5"];
-  console.log('training network with ' + epochs + " epochs.");
   stopNet();
   trainArgs.push("--epochs=" + epochs);
   if (reset) trainArgs.push('--retrain=True');
@@ -216,7 +223,6 @@ function trainNet(epochs = 50, reset = false) {
   pyshell.on('error', () => {});
   pyshell.on('message', () => {});
   pyshell.on('close', () => {
-    console.log('done training.');
     sendDiscordMessage('Training completed. Ran ' + epochs + ' epochs.');
     pending = false;
   });
