@@ -12,10 +12,7 @@ from keras.layers.recurrent import LSTM, SimpleRNN
 from keras.layers.wrappers import TimeDistributed
 import argparse
 from RNN_utils import *
-import warnings
-warnings.filterwarnings('ignore')
 
-print("arguments: "+"\n".join(sys.argv));
 # Parsing arguments for Network definition
 ap = argparse.ArgumentParser()
 ap.add_argument('--data_dir', default="./data/test.txt")
@@ -48,7 +45,12 @@ EPOCHS = args['epochs']
 
 X, y, VOCAB_SIZE, ix_to_char, chars = load_data(DATA_DIR, ALPHABET_DIR, SEQ_LENGTH)
 
-if not MODEL == '' and not RETRAIN:
+loadModel = False;
+
+if not MODEL == '':
+    loadModel = os.path.isfile(MODEL)
+
+if loadModel and not RETRAIN:
   model = load_model(MODEL)
   print('model loaded\n')
 else:

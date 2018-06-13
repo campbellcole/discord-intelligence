@@ -29,6 +29,8 @@ def load_data(data_dir, alphabet_dir, seq_length):
 
 	print('processing data...')
 
+	# this will filter out characters that are not in the alphabet
+	# can take a while depending on the dataset size
 	data = ''.join([ch for ch in data if ch in chars])
 
 	print('Data length: {} characters'.format(len(data)))
