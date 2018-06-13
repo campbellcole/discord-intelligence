@@ -1,6 +1,6 @@
 {
   "name": "discord-intelligence",
-  "version": "0.0.1-dev",
+  "version": "1.3.2-release",
   "description": "Discord Neural Network",
   "main": "index.js",
   "scripts": {
