@@ -24,7 +24,6 @@ const PREFIX = "det:";
 var socketConnected = false;
 var discordConnected = false;
 var silent = false;
-var owner = null;
 var channel = null; // single channel bot only
 var pending = false; // one command at a time
 var autogenerate = false;
@@ -100,7 +99,7 @@ function handleCommand(message) {
       helpstring_builder += "__Commands:__" + n;
       helpstring_builder += "**help:** displays this message" + n;
       helpstring_builder += "**generate <length> [seed]:** generates text" + n;
-      if (message.author == owner) {
+      if (isOwner(message)) {
         helpstring_builder += "**link:** sets \"channel\" to current channel" + n;
         helpstring_builder += "**status:** displays variables currently set" + n;
         helpstring_builder += "**forcepending <true/false>:** forces the \"pending\" variable in case it's stuck" + n;
@@ -116,13 +115,12 @@ function handleCommand(message) {
       sendDiscordMessage(helpstring_builder);
       break;
     case "link":
-      if (message.author != owner) return;
-      if (message.channel == null) return;
+      if (!isOwner(message)) return;
       channel = message.channel;
       sendDiscordMessage("Linked to current channel.");
       break;
     case "status":
-      if (message.author != owner) return;
+      if (!isOwner(message)) return;
       sendDiscordMessage("Status:" +
         "\nsocketConnected = " + socketConnected +
         "\npending = " + pending +
@@ -133,22 +131,22 @@ function handleCommand(message) {
         "\nmessage.author = " + message.author, true);
       break;
     case "forcepending":
-      if (message.author != owner) return;
+      if (!isOwner(message)) return;
       pending = args[0] == 'true';
       sendDiscordMessage("Forced 'pending' to " + pending);
       break;
     case "startnet":
-      if (message.author != owner) return;
+      if (!isOwner(message)) return;
       if (pending) return;
       startNet();
       break;
     case "stopnet":
-      if (message.author != owner) return;
+      if (!isOwner(message)) return;
       if (pending) return;
       stopNet();
       break;
     case "trainnet":
-      if (message.author != owner) return;
+      if (!isOwner(message)) return;
       if (pending) return;
       var epochs = 50,
         retrain = false;
@@ -161,15 +159,8 @@ function handleCommand(message) {
       discordConnected = false;
       trainNet(epochs, retrain);
       break;
-    case "setowner":
-      if (owner == null) {
-        owner = message.author;
-      } else {
-        message.author.send("Nice try.");
-      }
-      break;
     case "generate":
-      if (parseInt(args[0]) > 200 && message.author != owner) {
+      if (parseInt(args[0]) > 200 && !isOwner(message)) {
         sendDiscordMessage("Too many characters. That's gonna take too long.", true);
       } else {
         if (parseInt(args[0]) == NaN || parseInt(args[0]) < 1) {
@@ -180,7 +171,7 @@ function handleCommand(message) {
       }
       break;
     case "setautogenerate":
-      if (message.author != owner) return;
+      if (!isOwner(message)) return;
       if (args[0] != "true" && args[0] != "false") {
         sendDiscordMessage("Set to 'true' or 'false'.", true);
         return;
@@ -205,12 +196,6 @@ function handleCommand(message) {
       silent = !(args[0] == "verbose");
       sendDiscordMessage("wolfram-bot v" + VERSION + " by Campbell Cole", true);
       var willstartnet = !(args[0] == 'false')
-      // setowner
-      if (owner == null) {
-        owner = message.author;
-      } else {
-        message.author.send("Nice try.");
-      }
       // link
       channel = message.channel;
       sendDiscordMessage("Linked to current channel.");
@@ -223,7 +208,7 @@ function handleCommand(message) {
       if (willstartnet) startNet();
       break;
     case "restart":
-      if (message.author != owner) return;
+      if (!isOwner(message)) return;
       process.exit();
       break;
     default:
@@ -231,19 +216,9 @@ function handleCommand(message) {
   }
 }
 
-// commandline input
-
-process.stdin.resume();
-process.stdin.setEncoding('utf8');
-var util = require('util');
-process.stdin.on('data', function(text) {
-  if (channel == null) return;
-  handleCommand({
-    content: PREFIX + text.trim(),
-    channel: null,
-    author: "console"
-  });
-});
+function isOwner(message) {
+  return (message.author == channel.guild.owner.user);
+}
 
 // neural network (python script)
 
