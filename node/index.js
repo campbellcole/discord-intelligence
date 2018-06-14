@@ -20,7 +20,7 @@ const client = new Discord.Client();
 const TOKEN = config.TOKEN;
 client.login(TOKEN);
 
-const VERSION = "1.4.1";
+const VERSION = "1.4.3";
 const PREFIX = config.PREFIX;
 
 // vars
@@ -85,7 +85,6 @@ function sendSocketMessage(text) {
 }
 
 wss.on('connection', ws => {
-  console.log('connected to net')
   socketConnected = true;
   sendDiscordMessage('Network started successfully.');
   ws.on('message', function incoming(message) {
@@ -211,7 +210,8 @@ function handleCommand(message) {
       if (args[0] == 'set') {
         if (config[args[1]] != null) {
           config[args[1]] = args[2];
-          config_module.saveConfig(config);
+          config.splice(0, 2);
+          config_module.saveConfig(config.join());
         }
       } else if (args[0] == 'get') {
         if (config[args[1]] != null) {
