@@ -211,7 +211,7 @@ function handleCommand(message) {
         if (config[args[1]] != null) {
           var key = args[1];
           args.splice(0, 2);
-          config[args[1]] = args.join();
+          config[key] = args.join(" ");
           config_module.saveConfig(config);
         }
       } else if (args[0] == 'get') {
