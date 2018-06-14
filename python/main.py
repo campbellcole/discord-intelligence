@@ -74,9 +74,9 @@ if args['mode'] == 'train':
     while True:
         print('\n\nEpoch: {}\n'.format(nb_epoch))
         model.fit(X, y, batch_size=BATCH_SIZE, verbose=1, nb_epoch=1)
+        model.save(MODEL, overwrite=True)
         nb_epoch += 1
         if nb_epoch == EPOCHS:
-            model.save(MODEL, overwrite=True)
             exit()
 
 
