@@ -13,7 +13,8 @@ const DEFAULT = {
   AUTOGENDELAY: 18000000,
   ACTIVITY: "hentai",
   ACTTYPE: "WATCHING",
-  MAXGEN: 200
+  MAXGEN: 200,
+  USERS: []
 }
 
 function readConfig() {

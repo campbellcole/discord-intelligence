@@ -22,7 +22,7 @@ const client = new Discord.Client();
 const TOKEN = config.TOKEN;
 client.login(TOKEN);
 
-const VERSION = "1.5";
+const VERSION = "1.6";
 
 // vars
 
@@ -108,7 +108,8 @@ function handleCommand(message) {
       helpstring_builder += "__Commands:__" + n;
       helpstring_builder += "**help:** displays this message" + n;
       helpstring_builder += "**generate <length> [seed]:** generates text" + n;
-      if (isOwner(message)) {
+      helpstring_builder += "**version:** displays the current version" + n;
+      if (hasPermission(message)) {
         helpstring_builder += "**link:** sets \"channel\" to current channel" + n;
         helpstring_builder += "**status:** displays variables currently set" + n;
         helpstring_builder += "**forcepending <true/false>:** forces the \"pending\" variable in case it's stuck" + n;
@@ -119,17 +120,20 @@ function handleCommand(message) {
         helpstring_builder += "**resetautogenerate:** restarts the timer for auto generation" + n;
         helpstring_builder += "**config <get> <key>:** gets variables in the configuration file" + n;
         helpstring_builder += "**config <set> <key> <value...>:** sets variables in the configuration file" + n;
+        helpstring_builder += "**config list:** lists all configuration keys and values" + n;
+        helpstring_builder += "**adduser <user>:** adds user to list of authorized users" + n;
+        helpstring_builder += "**removeuser <user>:** removes user from the list of authorized users" + n;
         helpstring_builder += "**restart:** restarts the wolfram-bot" + n;
       }
-      sendDiscordMessage(helpstring_builder);
+      sendDiscordMessage(helpstring_builder, true);
       break;
     case "link":
-      if (!isOwner(message)) return;
+      if (!hasPermission(message)) return;
       channel = message.channel;
       sendDiscordMessage("Linked to current channel.");
       break;
     case "status":
-      if (!isOwner(message)) return;
+      if (!hasPermission(message)) return;
       var dataset = fs.readFileSync("common/study-data.txt").toString();
       sendDiscordMessage("Status:" +
         "\nsocketConnected = " + socketConnected +
@@ -145,22 +149,22 @@ function handleCommand(message) {
         "\ndataset.length (words) = " + dataset.split(" ").length, true);
       break;
     case "forcepending":
-      if (!isOwner(message)) return;
+      if (!hasPermission(message)) return;
       pending = args[0] == 'true';
       sendDiscordMessage("Forced 'pending' to " + pending);
       break;
     case "startnet":
-      if (!isOwner(message)) return;
+      if (!hasPermission(message)) return;
       if (pending) return;
       startNet();
       break;
     case "stopnet":
-      if (!isOwner(message)) return;
+      if (!hasPermission(message)) return;
       if (pending) return;
       stopNet();
       break;
     case "trainnet":
-      if (!isOwner(message)) return;
+      if (!hasPermission(message)) return;
       if (pending) return;
       var epochs = 50,
         retrain = false;
@@ -174,7 +178,7 @@ function handleCommand(message) {
       trainNet(epochs, retrain);
       break;
     case "generate":
-      if (parseInt(args[0]) > config.MAXGEN && !isOwner(message)) {
+      if (parseInt(args[0]) > config.MAXGEN) {
         sendDiscordMessage("Too many characters. That's gonna take too long.", true);
       } else {
         if (parseInt(args[0]) == NaN || parseInt(args[0]) < 1) {
@@ -185,11 +189,12 @@ function handleCommand(message) {
       }
       break;
     case "resetautogenerate":
-      if (!isOwner(message)) return;
+      if (!hasPermission(message)) return;
       clearTimeout();
       nextInterval();
       break;
     case "config":
+      if (!hasPermission(message)) return;
       if (args[0] == 'set') {
         if (config[args[1]] != null) {
           var key = args[1];
@@ -201,13 +206,35 @@ function handleCommand(message) {
         if (config[args[1]] != null) {
           sendDiscordMessage(args[1] + ": " + config[args[1]], true);
         }
+      } else if (args[0] == 'list') {
+        var keyvals = "";
+        for (var key in config) {
+          keyvals += key + ": " + config[key] + "\n";
+        }
+        sendDiscordMessage(keyvals, true);
+      }
+      break;
+    case "adduser":
+      if (!hasPermission(message)) return;
+      var snowflake = args[0].substr(2, args[0].length - 3);
+      if (message.channel.guild.members.array().includes(snowflake) != null) {
+        config.USERS.push(snowflake);
+        config_module.saveConfig(config);
+      }
+      break;
+    case "removeuser":
+      if (!hasPermission(message)) return;
+      var snowflake = args[0].substr(2, args[0].length - 3);
+      if (config.USERS.includes(snowflake)) {
+        config.USERS.splice(config.USERS.indexOf(snowflake), 1);
+        config_module.saveConfig(config);
       }
       break;
     case "version":
       sendDiscordMessage("v" + VERSION, true);
       break;
     case "restart":
-      if (!isOwner(message)) return;
+      if (!hasPermission(message)) return;
       process.exit();
       break;
     default:
@@ -215,8 +242,16 @@ function handleCommand(message) {
   }
 }
 
-function isOwner(message) {
-  return (message.author == channel.guild.owner.user);
+function hasPermission(message) {
+  if (config.USERS == null) {
+    config.USERS = [message.author.id];
+    config_module.saveConfig(config);
+  }
+  if (config.USERS.length == 0) {
+    config.USERS.push(message.author.id);
+    config_module.saveConfig(config);
+  }
+  return config.USERS.includes(message.author.id);
 }
 
 // neural network (python script)
