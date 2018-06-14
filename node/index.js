@@ -292,7 +292,7 @@ function trainNet(epochs = 50, reset = false) {
   pyshell.on('message', () => {});
   pyshell.on('close', () => {
     discordConnected = true;
-    sendDiscordMessage('Training completed. Ran ' + epochs + ' epochs.', true);
+    sendDiscordMessage('Training completed.', true);
     pending = false;
     startNet();
   });
