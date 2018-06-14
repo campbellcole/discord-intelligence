@@ -85,6 +85,7 @@ function sendSocketMessage(text) {
 }
 
 wss.on('connection', ws => {
+  console.log('connected to net')
   socketConnected = true;
   sendDiscordMessage('Network started successfully.');
   ws.on('message', function incoming(message) {
