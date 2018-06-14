@@ -49,6 +49,7 @@ function sendDiscordMessage(text, overrideSilent = false) {
 
 client.on('ready', () => {
   discordConnected = true;
+  client.user.setAvatar('common/avatar.png');
   client.user.setActivity(config.ACTIVITY, {
     type: config.ACTTYPE
   });
