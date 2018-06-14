@@ -20,7 +20,7 @@ const client = new Discord.Client();
 const TOKEN = config.TOKEN;
 client.login(TOKEN);
 
-const VERSION = "1.4.3";
+const VERSION = "1.4.4";
 const PREFIX = config.PREFIX;
 
 // vars
@@ -209,15 +209,19 @@ function handleCommand(message) {
     case "config":
       if (args[0] == 'set') {
         if (config[args[1]] != null) {
-          config[args[1]] = args[2];
-          config.splice(0, 2);
-          config_module.saveConfig(config.join());
+          var key = args[1];
+          args.splice(0, 2);
+          config[args[1]] = args.join();
+          config_module.saveConfig(config);
         }
       } else if (args[0] == 'get') {
         if (config[args[1]] != null) {
           sendDiscordMessage(args[1] + ": " + config[args[1]], true);
         }
       }
+      break;
+    case "version":
+      sendDiscordMessage("v" + VERSION, true);
       break;
     case "restart":
       if (!isOwner(message)) return;
