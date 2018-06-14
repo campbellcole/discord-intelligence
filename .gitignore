@@ -169,4 +169,4 @@ common/discord-token.txt
 common/study-data.txt
 *.hdf5
 package-lock.json
-*.yml
+common/config.yml
