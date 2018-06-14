@@ -23,7 +23,7 @@ function readConfig() {
     console.log(e);
   }
 }
-// TODO: actually save
+
 function saveConfig(newconf) {
   config = newconf;
   var serialized = yaml.safeDump(config);
