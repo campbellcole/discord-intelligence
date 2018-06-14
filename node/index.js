@@ -10,6 +10,8 @@ const config_module = require('./config');
 // preinit
 
 var config = config_module.getConfig();
+config.AUTOGENDELAY = parseInt(config.AUTOGENDELAY);
+config.MAXGEN = parseInt(config.MAXGEN);
 
 const wss = new WebSocket.Server({
   port: 3000,
