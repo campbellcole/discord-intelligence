@@ -218,7 +218,7 @@ function handleCommand(message) {
     case "adduser":
       if (!hasPermission(message)) return;
       var snowflake = args[0].substr(2, args[0].length - 3);
-      if (message.channel.guild.members.array().includes(snowflake) != null) {
+      if (message.channel.guild.members.array().includes(snowflake)) {
         config.USERS.push(snowflake);
         config_module.saveConfig(config);
       }
