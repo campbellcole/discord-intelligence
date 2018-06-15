@@ -257,6 +257,8 @@ function hasPermission(message) {
 
 // neural network (python script)
 
+var pyshell = null;
+
 function startNet() {
   var genArgs = ["--data_dir=common/study-data.txt", "--alphabet_dir=common/alphabet.txt", "--mode=gen", "--model=common/network.hdf5"];
   if (!fs.existsSync("common/network.hdf5")) {
