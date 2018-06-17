@@ -5,8 +5,7 @@ var config = null;
 
 const DEFAULT = {
   TOKEN: "token here",
-  VERSION: "1.4",
-  PREFIX: "det:",
+  PREFIX: "wolf:",
   VERBOSE: false,
   AUTOSTART: true,
   AUTOGEN: true,

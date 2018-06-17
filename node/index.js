@@ -22,8 +22,6 @@ const client = new Discord.Client();
 const TOKEN = config.TOKEN;
 client.login(TOKEN);
 
-const VERSION = "1.6";
-
 // vars
 
 var socketConnected = false;
@@ -109,7 +107,6 @@ function handleCommand(message) {
       helpstring_builder += "__Commands:__" + n;
       helpstring_builder += "**help:** displays this message" + n;
       helpstring_builder += "**generate <length> [seed]:** generates text" + n;
-      helpstring_builder += "**version:** displays the current version" + n;
       if (hasPermission(message)) {
         helpstring_builder += "**link:** sets \"channel\" to current channel" + n;
         helpstring_builder += "**status:** displays variables currently set" + n;
@@ -230,9 +227,6 @@ function handleCommand(message) {
         config.USERS.splice(config.USERS.indexOf(snowflake), 1);
         config_module.saveConfig(config);
       }
-      break;
-    case "version":
-      sendDiscordMessage("v" + VERSION, true);
       break;
     case "restart":
       if (!hasPermission(message)) return;
